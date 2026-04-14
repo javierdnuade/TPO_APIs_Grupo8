@@ -1,0 +1,138 @@
+TRAZABILIDAD DE CAMBIOS - TPO APLICACIONES INTERACTIVAS
+Ultima modificación: 2026-04-14
+
+Resumen general
+- Se incorporaron endpoints de consulta para dashboards (sin CRUD de dashboards).
+- Se agregaron filtros para creditos y clientes.
+- Se agrego validacion de DNI numerico al alta de clientes.
+- Se ajusto version de dependencia frontend (@reduxjs/toolkit) para evitar error de resolucion en Vite.
+
+1) Backend - Dashboard de creditos
+1.1 Endpoint nuevo
+- GET /api/creditos/dashboard
+- Archivo: backend/src/main/java/com/uade/tpejemplo/controller/CreditoController.java
+- Filtros opcionales:
+  * dniCliente
+  * nombreCliente
+  * deudaMin
+  * deudaMax
+  * fechaDesde
+  * fechaHasta
+  * soloConCuotasPendientes
+
+1.2 Contrato de servicio
+- Se agrego el metodo filtrarParaDashboard(...) en:
+  * backend/src/main/java/com/uade/tpejemplo/service/CreditoService.java
+
+1.3 Implementacion de filtros y validaciones
+- Se implemento filtro dinamico con Specification JPA en:
+  * backend/src/main/java/com/uade/tpejemplo/service/impl/CreditoServiceImpl.java
+- Validaciones agregadas:
+  * deudaMin no puede ser mayor que deudaMax
+  * fechaDesde no puede ser posterior a fechaHasta
+
+1.4 DTO de respuesta para dashboard
+- Archivo nuevo:
+  * backend/src/main/java/com/uade/tpejemplo/dto/response/CreditoDashboardResponse.java
+- Campos:
+  * id, dniCliente, nombreCliente
+  * deudaOriginal, montoCobrado, saldoPendiente
+  * cantidadCuotas, cuotasPagadas, cuotasPendientes
+  * fechaOtorgamiento
+
+1.5 Repositorio
+- Se habilito soporte de specifications en:
+  * backend/src/main/java/com/uade/tpejemplo/repository/CreditoRepository.java
+
+2) Backend - Dashboard de clientes
+2.1 Endpoint nuevo
+- GET /api/clientes/dashboard
+- Archivo: backend/src/main/java/com/uade/tpejemplo/controller/ClienteController.java
+- Filtros opcionales:
+  * dni
+  * nombre
+  * deudaTotalMin / deudaTotalMax
+  * saldoPendienteMin / saldoPendienteMax
+  * montoCobradoMin / montoCobradoMax
+  * cantidadCreditosMin / cantidadCreditosMax
+  * cuotasPendientesMin / cuotasPendientesMax
+  * soloConDeudaPendiente
+  * soloConCobranza
+
+2.2 Contrato de servicio
+- Se agrego el metodo filtrarParaDashboard(...) en:
+  * backend/src/main/java/com/uade/tpejemplo/service/ClienteService.java
+
+2.3 Implementacion de metricas agregadas por cliente
+- Archivo:
+  * backend/src/main/java/com/uade/tpejemplo/service/impl/ClienteServiceImpl.java
+- Metricas calculadas por cliente:
+  * cantidadCreditos
+  * deudaTotal
+  * montoCobradoTotal
+  * saldoPendienteTotal
+  * cantidadCuotas, cuotasPagadas, cuotasPendientes
+  * porcentajeCobranza
+- Validaciones de rango agregadas para filtros min/max (decimal e integer).
+
+2.4 DTO de respuesta para dashboard de clientes
+- Archivo nuevo:
+  * backend/src/main/java/com/uade/tpejemplo/dto/response/ClienteDashboardResponse.java
+
+2.5 Repositorio
+- Se habilito soporte de specifications en:
+  * backend/src/main/java/com/uade/tpejemplo/repository/ClienteRepository.java
+
+3) Backend - Validacion de DNI en alta de clientes
+3.1 Validacion agregada
+- Archivo:
+  * backend/src/main/java/com/uade/tpejemplo/dto/request/ClienteRequest.java
+- Reglas de validacion para campo dni:
+  * obligatorio (@NotBlank)
+  * solo numeros (@Pattern ^\\d+$)
+  * largo maximo 15 (@Size max=15)
+
+3.2 Manejo de error
+- El proyecto ya contaba con manejo de MethodArgumentNotValidException en:
+  * backend/src/main/java/com/uade/tpejemplo/exception/GlobalExceptionHandler.java
+- Resultado esperado para DNI invalido:
+  * HTTP 400 con detalle en mensajes de validacion
+
+4) Frontend - Integracion de filtros para dashboard
+4.1 API helper de creditos
+- Archivo:
+  * frontend/src/api/creditos.js
+- Metodo nuevo:
+  * getCreditosDashboard(filtros)
+
+4.2 API helper de clientes
+- Archivo:
+  * frontend/src/api/clientes.js
+- Metodo nuevo:
+  * getClientesDashboard(filtros)
+
+4.3 Dependencia ajustada
+- Archivo:
+  * frontend/package.json
+- Cambio:
+  * @reduxjs/toolkit -> ^2.10.1
+- Motivo:
+  * Resolver error de dep-scan en Vite observado con 2.11.2
+
+5) Documentacion y pruebas manuales
+5.1 Casos agregados en archivo HTTP
+- Archivo:
+  * backend/backend-tests.http
+- Incluye:
+  * ejemplos de filtros para /api/creditos/dashboard
+  * ejemplos de filtros para /api/clientes/dashboard
+  * caso de validacion de DNI invalido al crear cliente
+
+5.2 README actualizado
+- Archivo:
+  * README.md
+- Se agregaron los endpoints de dashboard de creditos y clientes en la seccion de API REST.
+
+Observaciones
+- La trazabilidad describe los cambios funcionales actualmente presentes en el codigo.
+- Puede complementarse con hash de commit/autor/fecha si se desea trazabilidad por versionado Git.
