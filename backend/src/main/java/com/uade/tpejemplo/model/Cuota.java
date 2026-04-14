@@ -26,4 +26,7 @@ public class Cuota {
     @NotNull
     @Column(name = "fecha_vencimiento", nullable = false)
     private LocalDate fechaVencimiento;
+
+    @Column(nullable = false)
+    private boolean pagada = false; 
 }

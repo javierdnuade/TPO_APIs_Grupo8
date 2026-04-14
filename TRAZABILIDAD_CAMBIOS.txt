@@ -1,5 +1,5 @@
 TRAZABILIDAD DE CAMBIOS - TPO APLICACIONES INTERACTIVAS
-Ultima modificación: 2026-04-14
+Ultima modificación: 2026-04-13
 
 Resumen general
 - Se incorporaron endpoints de consulta para dashboards (sin CRUD de dashboards).

@@ -2,6 +2,7 @@ package com.uade.tpejemplo.config;
 
 import com.uade.tpejemplo.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,7 +22,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    
     private final JwtAuthFilter jwtAuthFilter;
+
     private final UserDetailsService userDetailsService;
 
     @Bean
@@ -30,9 +33,17 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
-                .anyRequest().authenticated()
-            )
+                // 1. Rutas públicas (no requieren token)
+            .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+            
+            // 2. PROTECCIÓN DEL DASHBOARD: Solo para administradores
+            // Importante: El rol en la DB suele guardarse como 'ROLE_ADMIN', 
+            // pero aquí se pone solo 'ADMIN' si usas hasRole.
+            .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+            
+            // 3. El resto de la app requiere estar logueado (rol USER o ADMIN)
+            .anyRequest().authenticated()
+        )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

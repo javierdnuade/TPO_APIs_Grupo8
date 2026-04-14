@@ -45,4 +45,8 @@ public class Credito {
 
     @OneToMany(mappedBy = "credito", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Cuota> cuotas;
+
+    @NotNull
+    @Column()
+    private boolean estado= false;
 }

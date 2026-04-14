@@ -41,15 +41,16 @@ public class CreditoServiceImpl implements CreditoService {
         Cliente cliente = clienteRepository.findByDni(request.getDniCliente())
             .orElseThrow(() -> new ResourceNotFoundException("Cliente", "DNI", request.getDniCliente()));
 
-        Credito credito = new Credito(
-            null,
-            cliente,
-            request.getDeudaOriginal(),
-            request.getFecha(),
-            request.getImporteCuota(),
-            request.getCantidadCuotas(),
-            null
-        );
+    Credito credito = new Credito(
+        null,
+        cliente,
+        request.getDeudaOriginal(),
+        request.getFecha(),
+        request.getImporteCuota(),
+        request.getCantidadCuotas(),
+        null,
+        false
+    );
         creditoRepository.save(credito);
 
         // Generar cuotas automáticamente con vencimiento mensual
@@ -58,7 +59,8 @@ public class CreditoServiceImpl implements CreditoService {
             Cuota cuota = new Cuota(
                 new CuotaId(credito.getId(), i),
                 credito,
-                request.getFecha().plusMonths(i)
+                request.getFecha().plusMonths(i),
+                false
             );
             cuotas.add(cuota);
         }
