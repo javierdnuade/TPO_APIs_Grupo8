@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -13,10 +14,10 @@ public interface CreditoRepository extends JpaRepository<Credito, Long>, JpaSpec
 
     List<Credito> findByClienteDni(String dni);
 
-    @Query("SELECT SUM(c.montoTotal) FROM Credito c WHERE c.estado = 'APROBADO'")
-    Double sumarTotalPrestado();
+    @Query("SELECT COALESCE(SUM(c.deudaOriginal), 0) FROM Credito c")
+    BigDecimal sumarTotalPrestado();
 
-    @Query("SELECT COUNT(c) FROM Credito c WHERE c.estado = 'PENDIENTE'")
+    @Query("SELECT COUNT(c) FROM Credito c WHERE c.estado = false")
     Long contarCreditosPendientes();
 
     @Query("SELECT COUNT(DISTINCT c.cliente) FROM Credito c")

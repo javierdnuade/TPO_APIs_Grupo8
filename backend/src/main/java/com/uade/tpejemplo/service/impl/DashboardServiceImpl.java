@@ -8,6 +8,8 @@ import com.uade.tpejemplo.repository.CreditoRepository;
 import com.uade.tpejemplo.repository.CuotaRepository;
 import com.uade.tpejemplo.service.DashboardService;
 
+import java.math.BigDecimal;
+
 @Service
 public class DashboardServiceImpl implements DashboardService {
 
@@ -19,17 +21,19 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public DashboardResponse obtenerEstadisticas() {
-        // Obtenemos los datos de los repositorios que definimos en el Paso 2
-        Double total = creditoRepository.sumarTotalPrestado();
+        // Obtenemos los datos de los repositorios que definimos
+        BigDecimal total = creditoRepository.sumarTotalPrestado();
         Long pendientes = creditoRepository.contarCreditosPendientes();
         Long vencidas = cuotaRepository.contarCuotasVencidas();
 
         // Evitamos nulos si la base está vacía
-        total = (total != null) ? total : 0.0;
+        total = (total != null) ? total : BigDecimal.ZERO;
+        pendientes = (pendientes != null) ? pendientes : 0L;
+        vencidas = (vencidas != null) ? vencidas : 0L;
 
         // Construimos y retornamos el DTO
         return DashboardResponse.builder()
-                .capitalTotalPrestado(total)
+            .capitalTotalPrestado(total.doubleValue())
                 .cantidadPrestamosPendientes(pendientes)
                 .cantidadClientesActivos(creditoRepository.contarClientesConCreditos())
                 .tasaDeMora(vencidas.doubleValue()) 
