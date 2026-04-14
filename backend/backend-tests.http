@@ -38,6 +38,17 @@ Authorization: Bearer {{token}}
 }
 
 ###
+# Clientes - Validación DNI inválido (debe devolver 400)
+POST {{host}}/api/clientes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "dni": "12A45B",
+  "nombre": "Cliente DNI Invalido"
+}
+
+###
 # Clientes - Listar todos
 GET {{host}}/api/clientes
 Authorization: Bearer {{token}}
