@@ -1,9 +1,12 @@
 package com.uade.tpejemplo.service.impl;
 
 import com.uade.tpejemplo.dto.request.CreditoRequest;
+import com.uade.tpejemplo.dto.response.CreditoDashboardResponse;
 import com.uade.tpejemplo.dto.response.CreditoResponse;
 import com.uade.tpejemplo.dto.response.CuotaResponse;
+import com.uade.tpejemplo.exception.BusinessException;
 import com.uade.tpejemplo.exception.ResourceNotFoundException;
+import com.uade.tpejemplo.model.Cobranza;
 import com.uade.tpejemplo.model.Cliente;
 import com.uade.tpejemplo.model.Credito;
 import com.uade.tpejemplo.model.Cuota;
@@ -14,11 +17,14 @@ import com.uade.tpejemplo.repository.CreditoRepository;
 import com.uade.tpejemplo.repository.CuotaRepository;
 import com.uade.tpejemplo.service.CreditoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +85,57 @@ public class CreditoServiceImpl implements CreditoService {
             .toList();
     }
 
+    @Override
+    public List<CreditoDashboardResponse> filtrarParaDashboard(
+        String dniCliente,
+        String nombreCliente,
+        BigDecimal deudaMin,
+        BigDecimal deudaMax,
+        LocalDate fechaDesde,
+        LocalDate fechaHasta,
+        Boolean soloConCuotasPendientes
+    ) {
+        if (deudaMin != null && deudaMax != null && deudaMin.compareTo(deudaMax) > 0) {
+            throw new BusinessException("El filtro deudaMin no puede ser mayor que deudaMax");
+        }
+        if (fechaDesde != null && fechaHasta != null && fechaDesde.isAfter(fechaHasta)) {
+            throw new BusinessException("El filtro fechaDesde no puede ser posterior a fechaHasta");
+        }
+
+        Specification<Credito> spec = (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+
+            if (dniCliente != null && !dniCliente.isBlank()) {
+                predicates.add(cb.equal(root.get("cliente").get("dni"), dniCliente.trim()));
+            }
+            if (nombreCliente != null && !nombreCliente.isBlank()) {
+                predicates.add(cb.like(
+                    cb.lower(root.get("cliente").get("nombre")),
+                    "%" + nombreCliente.trim().toLowerCase() + "%"
+                ));
+            }
+            if (deudaMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("deudaOriginal"), deudaMin));
+            }
+            if (deudaMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("deudaOriginal"), deudaMax));
+            }
+            if (fechaDesde != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("fecha"), fechaDesde));
+            }
+            if (fechaHasta != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("fecha"), fechaHasta));
+            }
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return creditoRepository.findAll(spec).stream()
+            .map(this::toDashboardResponse)
+            .filter(r -> soloConCuotasPendientes == null || !soloConCuotasPendientes || r.getCuotasPendientes() > 0)
+            .toList();
+    }
+
     private CreditoResponse toResponse(Credito credito, List<Cuota> cuotas) {
         List<CuotaResponse> cuotasResponse = cuotas.stream()
             .map(c -> new CuotaResponse(
@@ -100,6 +157,32 @@ public class CreditoServiceImpl implements CreditoService {
             credito.getImporteCuota(),
             credito.getCantidadCuotas(),
             cuotasResponse
+        );
+    }
+
+    private CreditoDashboardResponse toDashboardResponse(Credito credito) {
+        List<Cuota> cuotas = cuotaRepository.findByIdIdCredito(credito.getId());
+        List<Cobranza> cobranzas = cobranzaRepository.findByCuotaIdIdCredito(credito.getId());
+
+        BigDecimal montoCobrado = cobranzas.stream()
+            .map(Cobranza::getImporte)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal saldoPendiente = credito.getDeudaOriginal().subtract(montoCobrado);
+        int cuotasPagadas = cobranzas.size();
+        int cuotasPendientes = Math.max(cuotas.size() - cuotasPagadas, 0);
+
+        return new CreditoDashboardResponse(
+            credito.getId(),
+            credito.getCliente().getDni(),
+            credito.getCliente().getNombre(),
+            credito.getDeudaOriginal(),
+            montoCobrado,
+            saldoPendiente,
+            cuotas.size(),
+            cuotasPagadas,
+            cuotasPendientes,
+            credito.getFecha()
         );
     }
 }

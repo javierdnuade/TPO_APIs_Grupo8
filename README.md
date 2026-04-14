@@ -113,6 +113,7 @@ tpejemplo/
 | POST | `/api/clientes` | Crear cliente |
 | GET | `/api/clientes` | Listar todos |
 | GET | `/api/clientes/{dni}` | Buscar por DNI |
+| GET | `/api/clientes/dashboard` | Filtros para dashboard de clientes (deuda, cobranzas, cuotas) |
 
 ### Créditos (requiere JWT)
 | Método | Endpoint | Descripción |
@@ -120,6 +121,7 @@ tpejemplo/
 | POST | `/api/creditos` | Crear crédito (genera cuotas automáticamente) |
 | GET | `/api/creditos/{id}` | Buscar por ID (incluye cuotas con estado pagada/pendiente) |
 | GET | `/api/creditos/cliente/{dni}` | Créditos de un cliente |
+| GET | `/api/creditos/dashboard` | Filtros para dashboards (dni, nombre, deuda, fechas, pendientes) |
 
 ### Cobranzas (requiere JWT)
 | Método | Endpoint | Descripción |

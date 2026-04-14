@@ -48,6 +48,16 @@ GET {{host}}/api/clientes/12345678
 Authorization: Bearer {{token}}
 
 ###
+# Clientes Dashboard - Filtro por deuda pendiente
+GET {{host}}/api/clientes/dashboard?soloConDeudaPendiente=true
+Authorization: Bearer {{token}}
+
+###
+# Clientes Dashboard - Filtros combinados (deuda, cobranzas y cuotas)
+GET {{host}}/api/clientes/dashboard?deudaTotalMin=50000&montoCobradoMin=10000&cuotasPendientesMax=3&soloConCobranza=true
+Authorization: Bearer {{token}}
+
+###
 # Créditos - Crear crédito para cliente
 POST {{host}}/api/creditos
 Content-Type: {{contentType}}
@@ -70,6 +80,16 @@ Authorization: Bearer {{token}}
 ###
 # Créditos - Créditos de un cliente (por DNI)
 GET {{host}}/api/creditos/cliente/12345678
+Authorization: Bearer {{token}}
+
+###
+# Créditos Dashboard - Filtro por deuda mínima (ejemplo: mayores o iguales a 10.000)
+GET {{host}}/api/creditos/dashboard?deudaMin=10000
+Authorization: Bearer {{token}}
+
+###
+# Créditos Dashboard - Filtros combinados
+GET {{host}}/api/creditos/dashboard?dniCliente=12345678&deudaMin=50000&fechaDesde=2026-01-01&fechaHasta=2026-12-31&soloConCuotasPendientes=true
 Authorization: Bearer {{token}}
 
 ###
