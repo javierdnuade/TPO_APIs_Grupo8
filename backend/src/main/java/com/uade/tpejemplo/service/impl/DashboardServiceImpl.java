@@ -24,19 +24,22 @@ public class DashboardServiceImpl implements DashboardService {
         // Obtenemos los datos de los repositorios que definimos
         BigDecimal total = creditoRepository.sumarTotalPrestado();
         Long pendientes = creditoRepository.contarCreditosPendientes();
+        Long aprobados = creditoRepository.contarCreditosAprobados();
         Long vencidas = cuotaRepository.contarCuotasVencidas();
 
         // Evitamos nulos si la base está vacía
         total = (total != null) ? total : BigDecimal.ZERO;
         pendientes = (pendientes != null) ? pendientes : 0L;
+        aprobados = (aprobados != null) ? aprobados : 0L;
         vencidas = (vencidas != null) ? vencidas : 0L;
 
         // Construimos y retornamos el DTO
         return DashboardResponse.builder()
             .capitalTotalPrestado(total.doubleValue())
-                .cantidadPrestamosPendientes(pendientes)
-                .cantidadClientesActivos(creditoRepository.contarClientesConCreditos())
-                .tasaDeMora(vencidas.doubleValue()) 
-                .build();
+            .cantidadPrestamosAprobados(aprobados)
+            .cantidadPrestamosPendientes(pendientes)
+            .cantidadClientesActivos(creditoRepository.contarClientesConCreditos())
+            .tasaDeMora(vencidas.doubleValue()) 
+        .build();
     }
 }

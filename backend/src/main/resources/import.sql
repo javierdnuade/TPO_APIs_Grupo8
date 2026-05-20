@@ -1,7 +1,7 @@
--- Usuarios (password para ambos: password)
+-- Usuarios (passwords en claro; serán hasheadas al iniciar la app)
 INSERT INTO usuarios (id, username, password, rol) VALUES
-  (1, 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN'),
-  (2, 'operador', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'USER');
+  (1, 'admin', 'password', 'ADMIN'),
+  (2, 'operador', 'password', 'USER');
 
 -- Clientes
 INSERT INTO clientes (dni, nombre) VALUES

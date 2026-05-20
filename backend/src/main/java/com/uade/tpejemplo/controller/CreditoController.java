@@ -43,8 +43,20 @@ public class CreditoController {
         @RequestParam(required = false) String nombreCliente,
         @RequestParam(required = false) BigDecimal deudaMin,
         @RequestParam(required = false) BigDecimal deudaMax,
+        @RequestParam(required = false) BigDecimal importeCuotaMin,
+        @RequestParam(required = false) BigDecimal importeCuotaMax,
+        @RequestParam(required = false) Integer cantidadCuotasMin,
+        @RequestParam(required = false) Integer cantidadCuotasMax,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+        @RequestParam(required = false) BigDecimal montoCobradoMin,
+        @RequestParam(required = false) BigDecimal montoCobradoMax,
+        @RequestParam(required = false) BigDecimal saldoPendienteMin,
+        @RequestParam(required = false) BigDecimal saldoPendienteMax,
+        @RequestParam(required = false) Integer cuotasPagadasMin,
+        @RequestParam(required = false) Integer cuotasPagadasMax,
+        @RequestParam(required = false) Integer cuotasPendientesMin,
+        @RequestParam(required = false) Integer cuotasPendientesMax,
         @RequestParam(required = false) Boolean soloConCuotasPendientes
     ) {
         return ResponseEntity.ok(creditoService.filtrarParaDashboard(
@@ -52,8 +64,20 @@ public class CreditoController {
             nombreCliente,
             deudaMin,
             deudaMax,
+            importeCuotaMin,
+            importeCuotaMax,
+            cantidadCuotasMin,
+            cantidadCuotasMax,
             fechaDesde,
             fechaHasta,
+            montoCobradoMin,
+            montoCobradoMax,
+            saldoPendienteMin,
+            saldoPendienteMax,
+            cuotasPagadasMin,
+            cuotasPagadasMax,
+            cuotasPendientesMin,
+            cuotasPendientesMax,
             soloConCuotasPendientes
         ));
     }

@@ -22,8 +22,20 @@ public interface CreditoService {
         String nombreCliente,
         BigDecimal deudaMin,
         BigDecimal deudaMax,
+        BigDecimal importeCuotaMin,
+        BigDecimal importeCuotaMax,
+        Integer cantidadCuotasMin,
+        Integer cantidadCuotasMax,
         LocalDate fechaDesde,
         LocalDate fechaHasta,
+        BigDecimal montoCobradoMin,
+        BigDecimal montoCobradoMax,
+        BigDecimal saldoPendienteMin,
+        BigDecimal saldoPendienteMax,
+        Integer cuotasPagadasMin,
+        Integer cuotasPagadasMax,
+        Integer cuotasPendientesMin,
+        Integer cuotasPendientesMax,
         Boolean soloConCuotasPendientes
     );
 }

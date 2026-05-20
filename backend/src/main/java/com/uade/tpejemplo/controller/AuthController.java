@@ -49,6 +49,25 @@ public class AuthController {
             .body(new AuthResponse(token, usuario.getUsername(), usuario.getRol().name()));
     }
 
+    @PostMapping("/register-admin")
+    public ResponseEntity<AuthResponse> registerAdmin(@Valid @RequestBody RegisterRequest request) {
+        if (usuarioRepository.existsByUsername(request.getUsername())) {
+            throw new BusinessException("El usuario '" + request.getUsername() + "' ya existe");
+        }
+
+        Usuario usuario = Usuario.builder()
+            .username(request.getUsername())
+            .password(passwordEncoder.encode(request.getPassword()))
+            .rol(Rol.ADMIN)
+            .build();
+
+        usuarioRepository.save(usuario);
+
+        String token = jwtUtil.generarToken(usuario);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(new AuthResponse(token, usuario.getUsername(), usuario.getRol().name()));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         authenticationManager.authenticate(

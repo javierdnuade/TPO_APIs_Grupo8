@@ -20,6 +20,9 @@ public interface CreditoRepository extends JpaRepository<Credito, Long>, JpaSpec
     @Query("SELECT COUNT(c) FROM Credito c WHERE c.estado = false")
     Long contarCreditosPendientes();
 
+    @Query("SELECT COUNT(c) FROM Credito c WHERE c.estado = true")
+    Long contarCreditosAprobados();
+
     @Query("SELECT COUNT(DISTINCT c.cliente) FROM Credito c")
     Long contarClientesConCreditos();
 }

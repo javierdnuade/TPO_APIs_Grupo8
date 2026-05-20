@@ -8,7 +8,6 @@ import lombok.Data;
 public class DashboardResponse {
     // Métricas de dinero
     private Double capitalTotalPrestado;
-    private Double interesesGenerados;
     
     // Métricas de cantidad
     private Long cantidadPrestamosAprobados;

@@ -33,16 +33,22 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // 1. Rutas públicas (no requieren token)
-            .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
-            
-            // 2. PROTECCIÓN DEL DASHBOARD: Solo para administradores
-            // Importante: El rol en la DB suele guardarse como 'ROLE_ADMIN', 
-            // pero aquí se pone solo 'ADMIN' si usas hasRole.
-            .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
-            
-            // 3. El resto de la app requiere estar logueado (rol USER o ADMIN)
-            .anyRequest().authenticated()
+                // 1. Rutas publicas (no requieren token)
+                .requestMatchers("/api/auth/login", "/h2-console/**").permitAll()
+
+                // 2. Registro de usuarios y admin: solo admins
+                .requestMatchers("/api/auth/register-admin", "/api/auth/register").hasRole("ADMIN")
+
+                // 3. PROTECCION DEL DASHBOARD: solo para administradores
+                // Importante: El rol en la DB suele guardarse como 'ROLE_ADMIN',
+                // pero aqui se pone solo 'ADMIN' si usas hasRole.
+                .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+
+                // 4. Listado de usuarios: solo admins
+                .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+
+                // 5. El resto de la app requiere estar logueado (rol USER o ADMIN)
+                .anyRequest().authenticated()
         )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

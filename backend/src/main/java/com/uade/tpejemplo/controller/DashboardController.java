@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DashboardController {
 
-    private DashboardService dashboardService;
+    private final DashboardService dashboardService;
 
     @GetMapping("/stats")
     public ResponseEntity<DashboardResponse> getStats() {

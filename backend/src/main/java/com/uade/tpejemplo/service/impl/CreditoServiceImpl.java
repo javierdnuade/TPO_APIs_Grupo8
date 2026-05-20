@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,19 +94,49 @@ public class CreditoServiceImpl implements CreditoService {
         String nombreCliente,
         BigDecimal deudaMin,
         BigDecimal deudaMax,
+        BigDecimal importeCuotaMin,
+        BigDecimal importeCuotaMax,
+        Integer cantidadCuotasMin,
+        Integer cantidadCuotasMax,
         LocalDate fechaDesde,
         LocalDate fechaHasta,
+        BigDecimal montoCobradoMin,
+        BigDecimal montoCobradoMax,
+        BigDecimal saldoPendienteMin,
+        BigDecimal saldoPendienteMax,
+        Integer cuotasPagadasMin,
+        Integer cuotasPagadasMax,
+        Integer cuotasPendientesMin,
+        Integer cuotasPendientesMax,
         Boolean soloConCuotasPendientes
     ) {
         if (deudaMin != null && deudaMax != null && deudaMin.compareTo(deudaMax) > 0) {
             throw new BusinessException("El filtro deudaMin no puede ser mayor que deudaMax");
         }
+        if (importeCuotaMin != null && importeCuotaMax != null && importeCuotaMin.compareTo(importeCuotaMax) > 0) {
+            throw new BusinessException("El filtro importeCuotaMin no puede ser mayor que importeCuotaMax");
+        }
+        if (cantidadCuotasMin != null && cantidadCuotasMax != null && cantidadCuotasMin > cantidadCuotasMax) {
+            throw new BusinessException("El filtro cantidadCuotasMin no puede ser mayor que cantidadCuotasMax");
+        }
         if (fechaDesde != null && fechaHasta != null && fechaDesde.isAfter(fechaHasta)) {
             throw new BusinessException("El filtro fechaDesde no puede ser posterior a fechaHasta");
         }
+        if (montoCobradoMin != null && montoCobradoMax != null && montoCobradoMin.compareTo(montoCobradoMax) > 0) {
+            throw new BusinessException("El filtro montoCobradoMin no puede ser mayor que montoCobradoMax");
+        }
+        if (saldoPendienteMin != null && saldoPendienteMax != null && saldoPendienteMin.compareTo(saldoPendienteMax) > 0) {
+            throw new BusinessException("El filtro saldoPendienteMin no puede ser mayor que saldoPendienteMax");
+        }
+        if (cuotasPagadasMin != null && cuotasPagadasMax != null && cuotasPagadasMin > cuotasPagadasMax) {
+            throw new BusinessException("El filtro cuotasPagadasMin no puede ser mayor que cuotasPagadasMax");
+        }
+        if (cuotasPendientesMin != null && cuotasPendientesMax != null && cuotasPendientesMin > cuotasPendientesMax) {
+            throw new BusinessException("El filtro cuotasPendientesMin no puede ser mayor que cuotasPendientesMax");
+        }
 
         Specification<Credito> spec = (root, query, cb) -> {
-            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            List<Predicate> predicates = new ArrayList<>();
 
             if (dniCliente != null && !dniCliente.isBlank()) {
                 predicates.add(cb.equal(root.get("cliente").get("dni"), dniCliente.trim()));
@@ -122,6 +153,18 @@ public class CreditoServiceImpl implements CreditoService {
             if (deudaMax != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("deudaOriginal"), deudaMax));
             }
+            if (importeCuotaMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("Cuota"), importeCuotaMin));
+            }
+            if (importeCuotaMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("importeCuota"), importeCuotaMax));
+            }
+            if (cantidadCuotasMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("cantidadCuotas"), cantidadCuotasMin));
+            }
+            if (cantidadCuotasMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("cantidadCuotas"), cantidadCuotasMax));
+            }
             if (fechaDesde != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("fecha"), fechaDesde));
             }
@@ -129,11 +172,15 @@ public class CreditoServiceImpl implements CreditoService {
                 predicates.add(cb.lessThanOrEqualTo(root.get("fecha"), fechaHasta));
             }
 
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
 
         return creditoRepository.findAll(spec).stream()
             .map(this::toDashboardResponse)
+            .filter(r -> matchesBigDecimalRange(r.getMontoCobrado(), montoCobradoMin, montoCobradoMax))
+            .filter(r -> matchesBigDecimalRange(r.getSaldoPendiente(), saldoPendienteMin, saldoPendienteMax))
+            .filter(r -> matchesIntegerRange(r.getCuotasPagadas(), cuotasPagadasMin, cuotasPagadasMax))
+            .filter(r -> matchesIntegerRange(r.getCuotasPendientes(), cuotasPendientesMin, cuotasPendientesMax))
             .filter(r -> soloConCuotasPendientes == null || !soloConCuotasPendientes || r.getCuotasPendientes() > 0)
             .toList();
     }
@@ -186,5 +233,31 @@ public class CreditoServiceImpl implements CreditoService {
             cuotasPendientes,
             credito.getFecha()
         );
+    }
+
+    private boolean matchesBigDecimalRange(BigDecimal value, BigDecimal min, BigDecimal max) {
+        if (value == null) {
+            return min == null && max == null;
+        }
+        if (min != null && value.compareTo(min) < 0) {
+            return false;
+        }
+        if (max != null && value.compareTo(max) > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean matchesIntegerRange(Integer value, Integer min, Integer max) {
+        if (value == null) {
+            return min == null && max == null;
+        }
+        if (min != null && value < min) {
+            return false;
+        }
+        if (max != null && value > max) {
+            return false;
+        }
+        return true;
     }
 }
