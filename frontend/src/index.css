@@ -6,6 +6,75 @@ body {
   color: #333;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #90caf9;
+  outline-offset: 2px;
+}
+
+/* Subtle, scoped micro-interactions (dashboard) */
+.ui-card {
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  will-change: transform;
+}
+
+.ui-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+  border-color: #90caf9;
+}
+
+.ui-btn {
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  will-change: transform;
+}
+
+.ui-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  filter: brightness(1.02);
+}
+
+.ui-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.10);
+  filter: brightness(0.98);
+}
+
+.ui-chart-item {
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  will-change: transform;
+}
+
+.ui-chart-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-card,
+  .ui-btn,
+  .ui-chart-item {
+    transition: none;
+  }
+
+  .ui-card:hover,
+  .ui-btn:hover:not(:disabled),
+  .ui-btn:active:not(:disabled),
+  .ui-chart-item:hover {
+    transform: none;
+    box-shadow: none;
+    filter: none;
+  }
+}
+
 table th, table td {
   padding: 10px 14px;
   text-align: left;

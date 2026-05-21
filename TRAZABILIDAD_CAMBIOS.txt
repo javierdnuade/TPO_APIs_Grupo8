@@ -4,6 +4,19 @@ Ultima modificación: 2026-05-21
 
 Cambios por fecha (mas reciente primero)
 
+21-05 (2)
+Frontend - Refactor de Graficos
+- Graficos: modularizacion en componentes (HorizontalBars, FilterForm) para reutilizar UI y mantener el render limpio.
+- useDashboardQuery: hook comun para busquedas, validacion, estado de carga/errores y reseteo de filtros.
+- Graficos config: constantes de filtros, campos, metricas y validaciones centralizadas (clientes/creditos).
+- Graficos styles: estilos movidos a modulo dedicado con grillas responsivas y card UI consistente.
+- Utils: helpers de validacion (rango, fechas, parseo numerico) reutilizables.
+
+Frontend - UI/Accesibilidad
+- index.css: estados focus-visible para inputs, selects, botones y links; mejor feedback de foco.
+- index.css: estilos de disabled para botones y micro-interacciones hover/active en tarjetas, botones e items de grafico.
+- Respeto de preferencias de movimiento reducido (prefers-reduced-motion).
+
 21-05
 Frontend - Graficos / Dashboards
 - App/Navbar: nueva ruta /graficos y acceso desde el menu.
