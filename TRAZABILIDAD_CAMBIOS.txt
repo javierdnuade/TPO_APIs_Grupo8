@@ -1,8 +1,15 @@
 TRAZABILIDAD DE CAMBIOS - TPO APLICACIONES INTERACTIVAS
 # Cada vez que se haga un cambio significativo en el proyecto, se debe actualizar este archivo con la fecha, descripción del cambio y los archivos afectados.
-Ultima modificación: 2026-05-20
+Ultima modificación: 2026-05-21
 
 Cambios por fecha (mas reciente primero)
+
+21-05
+Frontend - Graficos / Dashboards
+- App/Navbar: nueva ruta /graficos y acceso desde el menu.
+- Pagina Graficos: tableros con filtros para Clientes, Creditos y Cobranzas.
+- API: nuevos helpers para dashboard (/dashboard/stats) y usuarios (/usuarios/count).
+- Grafico solo ADMIN: comparacion en barras (Usuarios vs Clientes).
 
 20-05
 Backend - Seguridad y usuarios
