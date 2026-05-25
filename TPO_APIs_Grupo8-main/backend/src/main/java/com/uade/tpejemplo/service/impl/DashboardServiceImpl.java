@@ -40,7 +40,7 @@ public class DashboardServiceImpl implements DashboardService {
             .pagadas(aprobados)
             .pendientes(pendientes)
             .cantidadClientesActivos(creditoRepository.contarClientesConCreditos())
-            .vencidas(vencidas)) 
+            .vencidas(vencidas)
         .build();
     }
 
