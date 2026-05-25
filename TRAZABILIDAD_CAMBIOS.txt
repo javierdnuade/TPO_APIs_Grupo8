@@ -1,0 +1,208 @@
+TRAZABILIDAD DE CAMBIOS - TPO APLICACIONES INTERACTIVAS
+# Cada vez que se haga un cambio significativo en el proyecto, se debe actualizar este archivo con la fecha, descripción del cambio y los archivos afectados.
+Ultima modificación: 2026-05-21
+
+Cambios por fecha (mas reciente primero)
+
+21-05 (2)
+Frontend - Refactor de Graficos
+- Graficos: modularizacion en componentes (HorizontalBars, FilterForm) para reutilizar UI y mantener el render limpio.
+- useDashboardQuery: hook comun para busquedas, validacion, estado de carga/errores y reseteo de filtros.
+- Graficos config: constantes de filtros, campos, metricas y validaciones centralizadas (clientes/creditos).
+- Graficos styles: estilos movidos a modulo dedicado con grillas responsivas y card UI consistente.
+- Utils: helpers de validacion (rango, fechas, parseo numerico) reutilizables.
+
+Frontend - UI/Accesibilidad
+- index.css: estados focus-visible para inputs, selects, botones y links; mejor feedback de foco.
+- index.css: estilos de disabled para botones y micro-interacciones hover/active en tarjetas, botones e items de grafico.
+- Respeto de preferencias de movimiento reducido (prefers-reduced-motion).
+
+21-05
+Frontend - Graficos / Dashboards
+- App/Navbar: nueva ruta /graficos y acceso desde el menu.
+- Pagina Graficos: tableros con filtros para Clientes, Creditos y Cobranzas.
+- API: nuevos helpers para dashboard (/dashboard/stats) y usuarios (/usuarios/count).
+- Grafico solo ADMIN: comparacion en barras (Usuarios vs Clientes).
+
+20-05
+Backend - Seguridad y usuarios
+- AuthController: endpoint POST /api/auth/register-admin para alta de admins (genera JWT), protegido por rol ADMIN.
+- SecurityConfig: login publico, registro admin/usuario restringido a ADMIN, y nueva proteccion de /api/usuarios/**.
+- UsuarioController + UsuarioResponse: endpoints para contar, listar y buscar usuarios por username.
+
+Backend - Passwords en datos semilla
+- import.sql: passwords en claro para usuarios demo.
+- PasswordHashOnStartup: hash automatico al iniciar si la password no esta hasheada.
+
+Backend - Dashboard y creditos (filtros extra)
+- CreditoController/CreditoService/CreditoServiceImpl: nuevos filtros (importeCuota, cantidadCuotas, montoCobrado, saldoPendiente, cuotas pagadas/pendientes) y validaciones de rango.
+- CreditoServiceImpl: filtrado adicional en memoria para campos calculados (montoCobrado, saldoPendiente, cuotas pagadas/pendientes).
+- CreditoRepository: conteo de creditos aprobados.
+- DashboardServiceImpl/DashboardResponse: ajuste de metricas (cantidadPrestamosAprobados y quita de interesesGenerados).
+- DashboardController: dependencia marcada como final.
+
+Configuracion
+- application.properties: jwt.secret actualizado a valor mas robusto.
+
+Documentacion
+- Se elimina backend/DASHBOARD.txt (contenido consolidado en trazabilidad).
+
+14-03
+Backend - Dashboard de estadisticas (modulo general)
+Persistencia y modelo (JPA)
+- Entidad Cuota: Se agrego el atributo pagada (boolean) para permitir el seguimiento del flujo de caja y estados de mora.
+- CreditoRepository y CuotaRepository: Se desarrollaron consultas personalizadas con @Query (JPQL) para calculos de agregacion:
+  * Suma total de capital prestado.
+  * Conteo de creditos pendientes de aprobacion.
+  * Suma de intereses ganados (basado en cuotas liquidadas).
+  * Identificacion de mora (cuotas impagas vencidas).
+
+Arquitectura y capa de negocio (service)
+- Patron de diseno: Inversion de Dependencias mediante interfaz DashboardService e implementacion DashboardServiceImpl.
+- DTO: Se creo DashboardResponseDto para encapsular las metricas y enviarlas al frontend de forma segura y desacoplada.
+- Logica: Manejo de valores nulos y calculos de promedios para estabilidad ante bases de datos vacias.
+
+Endpoints REST (controller)
+- DashboardController: Endpoint GET /api/dashboard/stats.
+- Respuesta: ResponseEntity con codigos HTTP adecuados y formato JSON.
+
+Seguridad (JWT)
+- SecurityConfig: Se actualizo el SecurityFilterChain para incluir la proteccion del modulo.
+- Autorizacion: Solo usuarios con ROLE_ADMIN pueden acceder a los datos estadisticos.
+- Validacion: Se valida la firma del token JWT mediante JwtAuthFilter antes de permitir el acceso.
+
+Instrucciones para demo (video)
+- Mostrar el DTO y las @Query en los repositorios.
+- Probar en Postman acceso denegado (403) sin token de Admin.
+- Probar acceso exitoso (200) enviando JWT de Administrador.
+
+13-03
+Backend - Dashboard de creditos
+Endpoint nuevo
+- GET /api/creditos/dashboard
+- Archivo: backend/src/main/java/com/uade/tpejemplo/controller/CreditoController.java
+- Filtros opcionales:
+  * dniCliente
+  * nombreCliente
+  * deudaMin
+  * deudaMax
+  * fechaDesde
+  * fechaHasta
+  * soloConCuotasPendientes
+
+Contrato de servicio
+- Se agrego el metodo filtrarParaDashboard(...) en:
+  * backend/src/main/java/com/uade/tpejemplo/service/CreditoService.java
+
+Implementacion de filtros y validaciones
+- Se implemento filtro dinamico con Specification JPA en:
+  * backend/src/main/java/com/uade/tpejemplo/service/impl/CreditoServiceImpl.java
+- Validaciones agregadas:
+  * deudaMin no puede ser mayor que deudaMax
+  * fechaDesde no puede ser posterior a fechaHasta
+
+DTO de respuesta para dashboard
+- Archivo nuevo:
+  * backend/src/main/java/com/uade/tpejemplo/dto/response/CreditoDashboardResponse.java
+- Campos:
+  * id, dniCliente, nombreCliente
+  * deudaOriginal, montoCobrado, saldoPendiente
+  * cantidadCuotas, cuotasPagadas, cuotasPendientes
+  * fechaOtorgamiento
+
+Repositorio
+- Se habilito soporte de specifications en:
+  * backend/src/main/java/com/uade/tpejemplo/repository/CreditoRepository.java
+
+Backend - Dashboard de clientes
+Endpoint nuevo
+- GET /api/clientes/dashboard
+- Archivo: backend/src/main/java/com/uade/tpejemplo/controller/ClienteController.java
+- Filtros opcionales:
+  * dni
+  * nombre
+  * deudaTotalMin / deudaTotalMax
+  * saldoPendienteMin / saldoPendienteMax
+  * montoCobradoMin / montoCobradoMax
+  * cantidadCreditosMin / cantidadCreditosMax
+  * cuotasPendientesMin / cuotasPendientesMax
+  * soloConDeudaPendiente
+  * soloConCobranza
+
+Contrato de servicio
+- Se agrego el metodo filtrarParaDashboard(...) en:
+  * backend/src/main/java/com/uade/tpejemplo/service/ClienteService.java
+
+Implementacion de metricas agregadas por cliente
+- Archivo:
+  * backend/src/main/java/com/uade/tpejemplo/service/impl/ClienteServiceImpl.java
+- Metricas calculadas por cliente:
+  * cantidadCreditos
+  * deudaTotal
+  * montoCobradoTotal
+  * saldoPendienteTotal
+  * cantidadCuotas, cuotasPagadas, cuotasPendientes
+  * porcentajeCobranza
+- Validaciones de rango agregadas para filtros min/max (decimal e integer).
+
+DTO de respuesta para dashboard de clientes
+- Archivo nuevo:
+  * backend/src/main/java/com/uade/tpejemplo/dto/response/ClienteDashboardResponse.java
+
+Repositorio
+- Se habilito soporte de specifications en:
+  * backend/src/main/java/com/uade/tpejemplo/repository/ClienteRepository.java
+
+Backend - Validacion de DNI en alta de clientes
+Validacion agregada
+- Archivo:
+  * backend/src/main/java/com/uade/tpejemplo/dto/request/ClienteRequest.java
+- Reglas de validacion para campo dni:
+  * obligatorio (@NotBlank)
+  * solo numeros (@Pattern ^\\d+$)
+  * largo maximo 15 (@Size max=15)
+
+Manejo de error
+- El proyecto ya contaba con manejo de MethodArgumentNotValidException en:
+  * backend/src/main/java/com/uade/tpejemplo/exception/GlobalExceptionHandler.java
+- Resultado esperado para DNI invalido:
+  * HTTP 400 con detalle en mensajes de validacion
+
+Frontend - Integracion de filtros para dashboard
+API helper de creditos
+- Archivo:
+  * frontend/src/api/creditos.js
+- Metodo nuevo:
+  * getCreditosDashboard(filtros)
+
+API helper de clientes
+- Archivo:
+  * frontend/src/api/clientes.js
+- Metodo nuevo:
+  * getClientesDashboard(filtros)
+
+Dependencia ajustada
+- Archivo:
+  * frontend/package.json
+- Cambio:
+  * @reduxjs/toolkit -> ^2.10.1
+- Motivo:
+  * Resolver error de dep-scan en Vite observado con 2.11.2
+
+Documentacion y pruebas manuales
+Casos agregados en archivo HTTP
+- Archivo:
+  * backend/backend-tests.http
+- Incluye:
+  * ejemplos de filtros para /api/creditos/dashboard
+  * ejemplos de filtros para /api/clientes/dashboard
+  * caso de validacion de DNI invalido al crear cliente
+
+README actualizado
+- Archivo:
+  * README.md
+- Se agregaron los endpoints de dashboard de creditos y clientes en la seccion de API REST.
+
+Observaciones
+- La trazabilidad describe los cambios funcionales actualmente presentes en el codigo.
+- Puede complementarse con hash de commit/autor/fecha si se desea trazabilidad por versionado Git.
