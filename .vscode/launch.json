@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-TpEjemploApplication<tpejemplo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.uade.tpejemplo.TpEjemploApplication",
+            "projectName": "tpejemplo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
