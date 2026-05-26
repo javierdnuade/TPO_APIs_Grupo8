@@ -41,8 +41,12 @@ tpejemplo/
 │           └── CobranzaService / CobranzaServiceImpl
 └── frontend/              → Proyecto React + Vite
     └── src/
-        ├── api/           → apiClient.js, auth.js, clientes.js, creditos.js, cobranzas.js
-        ├── components/    → Navbar.jsx, PrivateRoute.jsx
+        ├── api/           → apiClient.js, auth.js, clientes.js, creditos.js, cobranzas.js, dashboard.js
+        ├── components/    
+            ├── Navbar.jsx
+            ├── PrivateRoute.jsx
+            ├── charts/        → HorizontalBars.jsx, PieChart.jsx, LineChart.jsx
+            └── dashboard/     → FilterForm.jsx
         ├── store/
         │   ├── index.js                  → configureStore (combina reducers)
         │   └── slices/
@@ -88,6 +92,7 @@ tpejemplo/
 | id | Long (PK, auto) | Identificador |
 | cuota | FK → Cuota | Cuota que se está pagando |
 | importe | BigDecimal | Importe cobrado |
+| fecha | LocalDate | Fecha en que se registró la cobranza |
 
 ### Usuario
 | Campo | Tipo | Descripción |
@@ -126,8 +131,14 @@ tpejemplo/
 ### Cobranzas (requiere JWT)
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| POST | `/api/cobranzas` | Registrar pago de una cuota |
+| POST | `/api/cobranzas` | Registrar pago de una cuota validando importe exacto|
 | GET | `/api/cobranzas/credito/{idCredito}` | Cobranzas de un crédito |
+
+### Dashboard (requiere JWT)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/dashboard/stats` | Estadisticas generales del sistema |
+| GET | `/api/dashboard/cobranzas-mensuales` | Evolucion de cobranzas agrupadas por mes |
 
 ---
 
@@ -190,6 +201,7 @@ Cada operación asíncrona usa `createAsyncThunk`, que maneja automáticamente l
 - **Navbar** despacha `logout()` y limpia `localStorage`
 - **apiClient.js** centraliza todas las llamadas fetch con el header `Authorization: Bearer <token>`
 - El proxy de Vite redirige `/api/*` → `localhost:8080` (evita CORS en desarrollo)
+- Recharts se utiliza para dashboards y visualizacion grafica (barras, torta y lineas)
 
 ### Páginas
 | Ruta | Componente | Acceso |
@@ -199,6 +211,7 @@ Cada operación asíncrona usa `createAsyncThunk`, que maneja automáticamente l
 | `/clientes` | Clientes.jsx | Privado |
 | `/creditos` | Creditos.jsx | Privado |
 | `/cobranzas` | Cobranzas.jsx | Privado |
+| `/graficos` | Graficos.jsx | Privado |
 
 ---
 

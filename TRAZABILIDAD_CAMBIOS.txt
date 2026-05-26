@@ -5,21 +5,19 @@ Ultima modificación: 2026-05-21
 Cambios por fecha (mas reciente primero)
 
 25-05
-Frontend - Dashboard de morosidad
-  - Se agrego un nuevo dashboard visual de morosidad con grafico tipo torta.
-  - El grafico muestra cuotas:
-      pagadas
-      pendientes
-      vencidas
-  - Se incorporo Recharts para mejorar la visualizacion de datos. 
-  
-Backend - Estadisticas de mora
-  - Se agrego el calculo de cuotas vencidas en el dashboard general.
-  - Se incorporo nueva logica para identificar cuotas impagas vencidas segun fecha de vencimiento.
+Backend - Validaciones y dashboards
+- CobranzaServiceImpl: se agrego validacion para impedir pagos con importes distintos al valor exacto de la cuota.
+- Dashboard de morosidad: nuevo grafico de torta para visualizar cuotas pagadas, pendientes y vencidas.
+- Dashboard de cobranzas mensuales: nuevo endpoint y grafico de lineas para mostrar evolucion de cobranzas por mes.
+- Entidad Cobranza: se agrego fecha de registro para soportar reportes historicos y metricas temporales.
+- DashboardController y DashboardService: nuevos endpoints y logica para metricas de cobranzas y morosidad.
+- CobranzaRepository y CuotaRepository: nuevas consultas JPQL para estadisticas y agrupacion mensual.
 
-Correcciones funcionales
-  - Se corrigio la logica de estados de cuotas para evitar que una cuota vencida aparezca tambien como pendiente.
-  - Se agrego validacion en cobranzas para permitir pagar solamente el importe exacto de la cuota.
+Frontend - UX y visualizacion
+- Cobranzas.jsx: agregado mensaje visual de exito al registrar pagos correctamente.
+- Graficos.jsx: integracion de dashboard de morosidad y evolucion mensual de cobranzas.
+- Components/charts: nuevos componentes PieChart y LineChart utilizando Recharts.
+- API dashboard.js: nuevos helpers para consumir dashboards de morosidad y cobranzas mensuales.
 
 21-05 (2)
 Frontend - Refactor de Graficos
