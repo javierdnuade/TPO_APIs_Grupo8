@@ -1,8 +1,14 @@
 TRAZABILIDAD DE CAMBIOS - TPO APLICACIONES INTERACTIVAS
 # Cada vez que se haga un cambio significativo en el proyecto, se debe actualizar este archivo con la fecha, descripción del cambio y los archivos afectados.
-Ultima modificación: 2026-05-21
+Ultima modificación: 2026-05-26
 
 Cambios por fecha (mas reciente primero)
+
+26-05
+Backend - Refactor de seguridad y roles
+- SecurityConfig: se refactorizo la configuracion de seguridad para centralizar la definicion de roles y permisos.
+Frontend - Mejoras en UX y validaciones
+- Se mejoró el grafico de morosidad para mostrar claramente la distribucion de cuotas pagadas, pendientes y vencidas.
 
 25-05
 Backend - Validaciones y dashboards
