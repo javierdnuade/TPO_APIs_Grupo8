@@ -33,21 +33,23 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // 1. Rutas publicas (no requieren token)
-                .requestMatchers("/api/auth/login", "/h2-console/**", "/api/auth/register").permitAll()
 
-                // 2. Registro de usuarios y admin: solo admins
+                // 1. Registro de usuarios y admin: solo admins
                 .requestMatchers("/api/auth/register-admin").hasRole("ADMIN")
 
-                // 3. PROTECCION DEL DASHBOARD: solo para administradores
+                // 2. PROTECCION DEL DASHBOARD: solo para administradores
                 // Importante: El rol en la DB suele guardarse como 'ROLE_ADMIN',
                 // pero aqui se pone solo 'ADMIN' si usas hasRole.
-                .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+                .requestMatchers("/api/dashboard/stats").hasRole("ADMIN")
 
-                // 4. Listado de usuarios: solo admins
-                .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
-
-                // 5. El resto de la app requiere estar logueado (rol USER o ADMIN)
+                // 3. Rutas publicas (no requieren token)
+                .requestMatchers("/api/auth/login",
+                    "/h2-console/**",
+                    "/api/auth/register",
+                    "/api/dashboard/**") 
+                .permitAll()
+                
+                // 4. El resto de la app requiere estar logueado (rol USER o ADMIN)
                 .anyRequest().authenticated()
         )
             .authenticationProvider(authenticationProvider())

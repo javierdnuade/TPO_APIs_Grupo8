@@ -24,7 +24,6 @@ export default function Cobranzas() {
     const result = await dispatch(addCobranza(payload));
     if (result.meta.requestStatus === 'fulfilled') {
       setSuccessMessage('Cobranza registrada correctamente');
-      await cargarMorosidad();
       setForm({ idCredito:'', idCuota:'', importe:'' });
       if (String(form.idCredito) === idCredito) dispatch(fetchCobranzasPorCredito(idCredito));
     }
