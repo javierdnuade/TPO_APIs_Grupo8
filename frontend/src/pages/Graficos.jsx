@@ -405,18 +405,10 @@ export default function Graficos() {
       )}
   </div>
 
-      <div style={styles.card} className="ui-card">
-        <h3 style={styles.h3}>Usuarios (solo ADMIN)</h3>
+      {isAdmin && (
+        <div style={styles.card} className="ui-card">
+          <h3 style={styles.h3}>Usuarios</h3>
 
-        {!isAdmin && (
-          <p style={styles.empty}>
-            Este gráfico es visible solo para administradores.
-          </p>
-        )}
-
-
-        {isAdmin && (
-          <>
             <p style={styles.subtitleSmall}>
               Compara cantidad de usuarios creados vs clientes creados.
             </p>
@@ -439,10 +431,8 @@ export default function Graficos() {
                 />
               </div>
             )}
-
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

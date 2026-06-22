@@ -46,7 +46,7 @@ public class AuthController {
 
         String token = jwtUtil.generarToken(usuario);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new AuthResponse(token, usuario.getUsername(), usuario.getRol().name()));
+            .body(toAuthResponse(token, usuario));
     }
 
     @PostMapping("/register-admin")
@@ -65,7 +65,7 @@ public class AuthController {
 
         String token = jwtUtil.generarToken(usuario);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new AuthResponse(token, usuario.getUsername(), usuario.getRol().name()));
+            .body(toAuthResponse(token, usuario));
     }
 
     @PostMapping("/login")
@@ -78,6 +78,16 @@ public class AuthController {
         String token = jwtUtil.generarToken(userDetails);
 
         Usuario usuario = (Usuario) userDetails;
-        return ResponseEntity.ok(new AuthResponse(token, usuario.getUsername(), usuario.getRol().name()));
+        return ResponseEntity.ok(toAuthResponse(token, usuario));
+    }
+
+    private AuthResponse toAuthResponse(String token, Usuario usuario) {
+        return new AuthResponse(
+            token,
+            usuario.getUsername(),
+            usuario.getRol().name(),
+            usuario.isPuedeAnularCredito(),
+            usuario.isPuedeAnularCobranza()
+        );
     }
 }

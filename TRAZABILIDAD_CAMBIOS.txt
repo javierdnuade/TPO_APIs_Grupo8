@@ -1,8 +1,26 @@
 TRAZABILIDAD DE CAMBIOS - TPO APLICACIONES INTERACTIVAS
 # Cada vez que se haga un cambio significativo en el proyecto, se debe actualizar este archivo con la fecha, descripción del cambio y los archivos afectados.
-Ultima modificación: 2026-05-26
+Ultima modificación: 2026-06-22
 
 Cambios por fecha (mas reciente primero)
+
+22-06 - Entrega 3 (Falta parte 3 de esta entrega)
+Backend - Gestor de permisos para administradores
+- Usuario: se agregaron permisos para controlar si un usuario puede anular creditos y cobranzas, dejando esa configuracion guardada en base de datos.
+- AdminController + UsuarioService: nuevo modulo para que un ADMIN pueda listar usuarios y actualizar sus permisos de forma centralizada.
+- AuthResponse / UsuarioResponse: se ampliaron las respuestas del backend para incluir la informacion necesaria de rol y permisos sin exponer datos sensibles.
+- SecurityConfig: se reforzo la seguridad para que la gestion de permisos quede reservada solo a administradores.
+- DashboardServiceImpl: se ordeno la forma de inyectar dependencias para mantener consistencia con el resto del proyecto.
+- import.sql: se ajustaron los datos iniciales para contemplar los nuevos permisos desde el arranque.
+
+Frontend - Pantalla de administracion de permisos
+- GestorPermisos: nueva pantalla para que los administradores puedan ver usuarios del sistema y activar o desactivar permisos con checkboxes.
+- Redux / API admin: se agrego manejo global de estado y llamadas al backend para cargar usuarios y actualizar permisos en el momento.
+- Navbar + rutas protegidas: se agrego acceso al gestor de permisos solo para ADMIN y se protegio la ruta para evitar accesos no permitidos.
+
+Frontend - Ajustes en graficos y accesos
+- Graficos: se mantuvo la pagina disponible para usuarios autenticados, pero el grafico de usuarios sigue siendo visible solo para administradores.
+- Navbar / App: se corrigio el acceso a /graficos para que no quede restringido de mas y se respete el comportamiento esperado para USER y ADMIN.
 
 26-05
 Backend - Refactor de seguridad y roles

@@ -10,4 +10,6 @@ public class AuthResponse {
     private String token;
     private String username;
     private String rol;
+    private boolean puedeAnularCredito;
+    private boolean puedeAnularCobranza;
 }

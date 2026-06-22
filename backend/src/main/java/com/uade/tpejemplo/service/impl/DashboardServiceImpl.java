@@ -1,8 +1,5 @@
 package com.uade.tpejemplo.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.uade.tpejemplo.dto.response.CobranzaMensualResponse;
 import com.uade.tpejemplo.dto.response.DashboardResponse;
 import com.uade.tpejemplo.dto.response.MorosidadDashboardResponse;
@@ -10,21 +7,19 @@ import com.uade.tpejemplo.repository.CobranzaRepository;
 import com.uade.tpejemplo.repository.CreditoRepository;
 import com.uade.tpejemplo.repository.CuotaRepository;
 import com.uade.tpejemplo.service.DashboardService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
-    @Autowired
-    private CreditoRepository creditoRepository;
-
-    @Autowired
-    private CuotaRepository cuotaRepository;
-
-    @Autowired
-    private CobranzaRepository cobranzaRepository;
+    private final CreditoRepository creditoRepository;
+    private final CuotaRepository cuotaRepository;
+    private final CobranzaRepository cobranzaRepository;
 
     @Override
     public DashboardResponse obtenerEstadisticas() {

@@ -1,7 +1,7 @@
 -- Usuarios (passwords en claro; serán hasheadas al iniciar la app)
-INSERT INTO usuarios (id, username, password, rol) VALUES
-  (1, 'admin', 'password', 'ADMIN'),
-  (2, 'operador', 'password', 'USER');
+INSERT INTO usuarios (id, username, password, rol, puede_anular_credito, puede_anular_cobranza) VALUES
+  (1, 'admin', 'password', 'ADMIN', FALSE, FALSE),
+  (2, 'operador', 'password', 'USER', FALSE, FALSE);
 
 -- Clientes
 INSERT INTO clientes (dni, nombre) VALUES
