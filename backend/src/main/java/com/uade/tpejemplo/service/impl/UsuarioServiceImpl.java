@@ -20,6 +20,25 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
     @Override
+    public long contarUsuarios() {
+        return usuarioRepository.count();
+    }
+
+    @Override
+    public UsuarioResponse buscarPorUsername(String username) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario", "username", username));
+        return UsuarioResponse.from(usuario);
+    }
+
+    @Override
+    public List<UsuarioResponse> listarTodos() {
+        return usuarioRepository.findAll().stream()
+            .map(UsuarioResponse::from)
+            .toList();
+    }
+
+    @Override
     public List<UsuarioResponse> listarUsuariosConRolUser() {
         return usuarioRepository.findAllByRolOrderByUsernameAsc(Rol.USER).stream()
             .map(UsuarioResponse::from)

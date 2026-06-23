@@ -1,6 +1,6 @@
 import { api } from './apiClient';
 
-export const getUsuariosConPermisos = () => api.get('/admin/usuarios');
+export const getUsuariosConPermisos = () => api.get('/usuarios/gestion-permisos');
 
 export const updatePermisosUsuario = (id, data) =>
-  api.put(`/admin/usuarios/${id}/permisos`, data);
+  api.put(`/usuarios/${id}/permisos`, data);

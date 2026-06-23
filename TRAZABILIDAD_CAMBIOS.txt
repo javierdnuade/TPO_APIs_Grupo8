@@ -12,6 +12,7 @@ Backend - Reglas de anulacion y control de permisos
 - Permisos: se reforzo la validacion para que solo los usuarios autorizados puedan realizar estas anulaciones.
 - Mensajes del sistema: se mejoro la devolucion de errores para informar de forma clara por que una anulacion fue rechazada.
 - Reportes y listados: se ajusto el comportamiento para que los registros anulados no generen confusiones en consultas, dashboards y estados visibles del sistema.
+- Modificacion en AdminController y UsuarioController: se unificaron los controladores de usuarios y administradores para centralizar la gestion de permisos y roles, evitando duplicacion de codigo y mejorando la mantenibilidad.
 
 Frontend - Pantallas y seguimiento visual
 - Creditos: se agrego el boton Anular en la pantalla de creditos, mostrandolo solo cuando el usuario tiene permiso y ocultandolo si el credito ya esta anulado.

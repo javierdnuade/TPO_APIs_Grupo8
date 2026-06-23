@@ -7,6 +7,12 @@ import java.util.List;
 
 public interface UsuarioService {
 
+    long contarUsuarios();
+
+    UsuarioResponse buscarPorUsername(String username);
+
+    List<UsuarioResponse> listarTodos();
+
     List<UsuarioResponse> listarUsuariosConRolUser();
 
     UsuarioResponse actualizarPermisos(Long usuarioId, PermisosRequest request);
