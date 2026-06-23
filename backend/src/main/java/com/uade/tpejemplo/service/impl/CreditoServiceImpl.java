@@ -11,21 +11,26 @@ import com.uade.tpejemplo.model.Cliente;
 import com.uade.tpejemplo.model.Credito;
 import com.uade.tpejemplo.model.Cuota;
 import com.uade.tpejemplo.model.CuotaId;
+import com.uade.tpejemplo.model.Usuario;
 import com.uade.tpejemplo.repository.ClienteRepository;
 import com.uade.tpejemplo.repository.CobranzaRepository;
 import com.uade.tpejemplo.repository.CreditoRepository;
 import com.uade.tpejemplo.repository.CuotaRepository;
+import com.uade.tpejemplo.repository.UsuarioRepository;
 import com.uade.tpejemplo.service.CreditoService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.criteria.Predicate;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class CreditoServiceImpl implements CreditoService {
     private final ClienteRepository clienteRepository;
     private final CuotaRepository cuotaRepository;
     private final CobranzaRepository cobranzaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     @Transactional
@@ -42,28 +48,27 @@ public class CreditoServiceImpl implements CreditoService {
         Cliente cliente = clienteRepository.findByDni(request.getDniCliente())
             .orElseThrow(() -> new ResourceNotFoundException("Cliente", "DNI", request.getDniCliente()));
 
-    Credito credito = new Credito(
-        null,
-        cliente,
-        request.getDeudaOriginal(),
-        request.getFecha(),
-        request.getImporteCuota(),
-        request.getCantidadCuotas(),
-        null,
-        false
-    );
+        Credito credito = new Credito(
+            null,
+            cliente,
+            request.getDeudaOriginal(),
+            request.getFecha(),
+            request.getImporteCuota(),
+            request.getCantidadCuotas(),
+            null,
+            false,
+            false
+        );
         creditoRepository.save(credito);
 
-        // Generar cuotas automáticamente con vencimiento mensual
         List<Cuota> cuotas = new ArrayList<>();
         for (int i = 1; i <= request.getCantidadCuotas(); i++) {
-            Cuota cuota = new Cuota(
+            cuotas.add(new Cuota(
                 new CuotaId(credito.getId(), i),
                 credito,
                 request.getFecha().plusMonths(i),
                 false
-            );
-            cuotas.add(cuota);
+            ));
         }
         cuotaRepository.saveAll(cuotas);
 
@@ -72,10 +77,8 @@ public class CreditoServiceImpl implements CreditoService {
 
     @Override
     public CreditoResponse buscarPorId(Long id) {
-        Credito credito = creditoRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Crédito", "id", id));
-        List<Cuota> cuotas = cuotaRepository.findByIdIdCredito(id);
-        return toResponse(credito, cuotas);
+        Credito credito = obtenerCredito(id);
+        return toResponse(credito, cuotaRepository.findByIdIdCredito(id));
     }
 
     @Override
@@ -83,9 +86,33 @@ public class CreditoServiceImpl implements CreditoService {
         if (!clienteRepository.existsByDni(dniCliente)) {
             throw new ResourceNotFoundException("Cliente", "DNI", dniCliente);
         }
-        return creditoRepository.findByClienteDni(dniCliente).stream()
-            .map(c -> toResponse(c, cuotaRepository.findByIdIdCredito(c.getId())))
+
+        return creditoRepository.findByClienteDniOrderByIdAsc(dniCliente).stream()
+            .map(credito -> toResponse(credito, cuotaRepository.findByIdIdCredito(credito.getId())))
             .toList();
+    }
+
+    @Override
+    @Transactional
+    public CreditoResponse anular(Long id) {
+        Usuario usuario = obtenerUsuarioAutenticado();
+        if (!usuario.isPuedeAnularCredito()) {
+            throw new AccessDeniedException("No tiene permisos para anular creditos.");
+        }
+
+        Credito credito = obtenerCredito(id);
+        if (credito.isAnulado()) {
+            return toResponse(credito, cuotaRepository.findByIdIdCredito(id));
+        }
+
+        if (cobranzaRepository.existsActivaByCredito(id)) {
+            throw new BusinessException("No se puede anular el credito " + id + " porque tiene cobranzas registradas.");
+        }
+
+        credito.setAnulado(true);
+        creditoRepository.save(credito);
+
+        return toResponse(credito, cuotaRepository.findByIdIdCredito(id));
     }
 
     @Override
@@ -137,6 +164,7 @@ public class CreditoServiceImpl implements CreditoService {
 
         Specification<Credito> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isFalse(root.get("anulado")));
 
             if (dniCliente != null && !dniCliente.isBlank()) {
                 predicates.add(cb.equal(root.get("cliente").get("dni"), dniCliente.trim()));
@@ -154,7 +182,7 @@ public class CreditoServiceImpl implements CreditoService {
                 predicates.add(cb.lessThanOrEqualTo(root.get("deudaOriginal"), deudaMax));
             }
             if (importeCuotaMin != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("Cuota"), importeCuotaMin));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("importeCuota"), importeCuotaMin));
             }
             if (importeCuotaMax != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("importeCuota"), importeCuotaMax));
@@ -185,15 +213,28 @@ public class CreditoServiceImpl implements CreditoService {
             .toList();
     }
 
+    private Credito obtenerCredito(Long id) {
+        return creditoRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Credito", "id", id));
+    }
+
+    private Usuario obtenerUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            throw new AccessDeniedException("No tiene permisos para anular creditos.");
+        }
+
+        return usuarioRepository.findByUsername(authentication.getName())
+            .orElseThrow(() -> new AccessDeniedException("No tiene permisos para anular creditos."));
+    }
+
     private CreditoResponse toResponse(Credito credito, List<Cuota> cuotas) {
         List<CuotaResponse> cuotasResponse = cuotas.stream()
-            .map(c -> new CuotaResponse(
-                c.getId().getIdCredito(),
-                c.getId().getIdCuota(),
-                c.getFechaVencimiento(),
-                cobranzaRepository.existsByCuotaIdIdCreditoAndCuotaIdIdCuota(
-                    c.getId().getIdCredito(), c.getId().getIdCuota()
-                )
+            .map(cuota -> new CuotaResponse(
+                cuota.getId().getIdCredito(),
+                cuota.getId().getIdCuota(),
+                cuota.getFechaVencimiento(),
+                cuota.isPagada()
             ))
             .toList();
 
@@ -205,20 +246,21 @@ public class CreditoServiceImpl implements CreditoService {
             credito.getFecha(),
             credito.getImporteCuota(),
             credito.getCantidadCuotas(),
-            cuotasResponse
+            cuotasResponse,
+            credito.isAnulado()
         );
     }
 
     private CreditoDashboardResponse toDashboardResponse(Credito credito) {
         List<Cuota> cuotas = cuotaRepository.findByIdIdCredito(credito.getId());
-        List<Cobranza> cobranzas = cobranzaRepository.findByCuotaIdIdCredito(credito.getId());
+        List<Cobranza> cobranzas = cobranzaRepository.findByCuotaIdIdCreditoAndAnuladaFalse(credito.getId());
 
         BigDecimal montoCobrado = cobranzas.stream()
             .map(Cobranza::getImporte)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal saldoPendiente = credito.getDeudaOriginal().subtract(montoCobrado);
-        int cuotasPagadas = cobranzas.size();
+        int cuotasPagadas = (int) cuotas.stream().filter(Cuota::isPagada).count();
         int cuotasPendientes = Math.max(cuotas.size() - cuotasPagadas, 0);
 
         return new CreditoDashboardResponse(
@@ -242,10 +284,7 @@ public class CreditoServiceImpl implements CreditoService {
         if (min != null && value.compareTo(min) < 0) {
             return false;
         }
-        if (max != null && value.compareTo(max) > 0) {
-            return false;
-        }
-        return true;
+        return max == null || value.compareTo(max) <= 0;
     }
 
     private boolean matchesIntegerRange(Integer value, Integer min, Integer max) {
@@ -255,9 +294,6 @@ public class CreditoServiceImpl implements CreditoService {
         if (min != null && value < min) {
             return false;
         }
-        if (max != null && value > max) {
-            return false;
-        }
-        return true;
+        return max == null || value <= max;
     }
 }

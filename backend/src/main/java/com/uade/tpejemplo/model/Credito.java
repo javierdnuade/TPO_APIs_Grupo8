@@ -49,4 +49,8 @@ public class Credito {
     @NotNull
     @Column()
     private boolean estado= false;
+
+    @NotNull
+    @Column(nullable = false)
+    private boolean anulado = false;
 }

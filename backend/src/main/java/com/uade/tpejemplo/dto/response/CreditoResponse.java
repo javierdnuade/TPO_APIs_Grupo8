@@ -19,4 +19,5 @@ public class CreditoResponse {
     private BigDecimal importeCuota;
     private Integer cantidadCuotas;
     private List<CuotaResponse> cuotas;
+    private boolean anulado;
 }

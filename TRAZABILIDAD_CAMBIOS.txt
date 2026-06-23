@@ -1,8 +1,24 @@
 TRAZABILIDAD DE CAMBIOS - TPO APLICACIONES INTERACTIVAS
-# Cada vez que se haga un cambio significativo en el proyecto, se debe actualizar este archivo con la fecha, descripción del cambio y los archivos afectados.
-Ultima modificación: 2026-06-22
+# Cada vez que se haga un cambio significativo en el proyecto, se debe actualizar este archivo con la fecha, descripciÃ³n del cambio y los archivos afectados.
+Ultima modificaciÃ³n: 2026-06-23
 
 Cambios por fecha (mas reciente primero)
+
+23-06 - Entrega 3 Parte 3 (Anulacion de creditos y cobranzas)
+Backend - Reglas de anulacion y control de permisos
+- Creditos: se agrego la anulacion logica para poder marcar creditos como anulados sin borrar informacion del sistema.
+- Cobranzas: se agrego la anulacion logica para permitir revertir cobranzas del dia y mantener el historial de movimientos.
+- Reglas de negocio: se incorporaron validaciones para evitar anular creditos que ya tengan cobranzas registradas y para permitir anular cobranzas solo si fueron hechas en el dia actual.
+- Permisos: se reforzo la validacion para que solo los usuarios autorizados puedan realizar estas anulaciones.
+- Mensajes del sistema: se mejoro la devolucion de errores para informar de forma clara por que una anulacion fue rechazada.
+- Reportes y listados: se ajusto el comportamiento para que los registros anulados no generen confusiones en consultas, dashboards y estados visibles del sistema.
+
+Frontend - Pantallas y seguimiento visual
+- Creditos: se agrego el boton Anular en la pantalla de creditos, mostrandolo solo cuando el usuario tiene permiso y ocultandolo si el credito ya esta anulado.
+- Cobranzas: se agrego el boton Anular en la pantalla de cobranzas, respetando permisos y el estado actual de cada registro.
+- Visualizacion: los creditos y cobranzas anulados ahora se muestran diferenciados para que el usuario pueda identificarlos rapidamente.
+- Integracion con mensajes: la interfaz ahora muestra el motivo exacto enviado por el backend cuando una anulacion no puede realizarse.
+- Actualizacion en pantalla: se conectaron estas acciones al estado global para reflejar los cambios sin necesidad de recargar manualmente la pagina.
 
 22-06 - Entrega 3 (Falta parte 3 de esta entrega)
 Backend - Gestor de permisos para administradores
@@ -26,7 +42,7 @@ Frontend - Ajustes en graficos y accesos
 Backend - Refactor de seguridad y roles
 - SecurityConfig: se refactorizo la configuracion de seguridad para centralizar la definicion de roles y permisos.
 Frontend - Mejoras en UX y validaciones
-- Se mejoró el grafico de morosidad para mostrar claramente la distribucion de cuotas pagadas, pendientes y vencidas.
+- Se mejorÃ³ el grafico de morosidad para mostrar claramente la distribucion de cuotas pagadas, pendientes y vencidas.
 
 25-05
 Backend - Validaciones y dashboards

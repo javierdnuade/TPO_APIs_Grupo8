@@ -37,6 +37,11 @@ public class CreditoController {
         return ResponseEntity.ok(creditoService.listarPorCliente(dni));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<CreditoResponse> anular(@PathVariable Long id) {
+        return ResponseEntity.ok(creditoService.anular(id));
+    }
+
     @GetMapping("/dashboard")
     public ResponseEntity<List<CreditoDashboardResponse>> filtrarParaDashboard(
         @RequestParam(required = false) String dniCliente,

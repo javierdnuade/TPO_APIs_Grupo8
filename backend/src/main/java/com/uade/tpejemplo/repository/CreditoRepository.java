@@ -12,15 +12,19 @@ public interface CreditoRepository extends JpaRepository<Credito, Long>, JpaSpec
 
     List<Credito> findByClienteDni(String dni);
 
-    @Query("SELECT COALESCE(SUM(c.deudaOriginal), 0) FROM Credito c")
+    List<Credito> findByClienteDniOrderByIdAsc(String dni);
+
+    List<Credito> findByClienteDniAndAnuladoFalseOrderByIdAsc(String dni);
+
+    @Query("SELECT COALESCE(SUM(c.deudaOriginal), 0) FROM Credito c WHERE c.anulado = false")
     BigDecimal sumarTotalPrestado();
 
-    @Query("SELECT COUNT(c) FROM Credito c WHERE c.estado = false")
+    @Query("SELECT COUNT(c) FROM Credito c WHERE c.estado = false AND c.anulado = false")
     Long contarCreditosPendientes();
 
-    @Query("SELECT COUNT(c) FROM Credito c WHERE c.estado = true")
+    @Query("SELECT COUNT(c) FROM Credito c WHERE c.estado = true AND c.anulado = false")
     Long contarCreditosAprobados();
 
-    @Query("SELECT COUNT(DISTINCT c.cliente) FROM Credito c")
+    @Query("SELECT COUNT(DISTINCT c.cliente) FROM Credito c WHERE c.anulado = false")
     Long contarClientesConCreditos();
 }

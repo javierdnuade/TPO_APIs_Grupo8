@@ -13,13 +13,13 @@ public interface CuotaRepository extends JpaRepository<Cuota, CuotaId> {
 
     // Cantidad de cuotas vencidas y no pagadas (Tasa de Mora)
     // Asumiendo que tenés un campo 'fechaVencimiento' y 'pagada'
-    @Query("SELECT COUNT(cu) FROM Cuota cu WHERE cu.pagada = false AND cu.fechaVencimiento < CURRENT_DATE")
+    @Query("SELECT COUNT(cu) FROM Cuota cu WHERE cu.pagada = false AND cu.fechaVencimiento < CURRENT_DATE AND cu.credito.anulado = false")
     Long contarCuotasVencidas();
 
-    @Query("SELECT COUNT(cu) FROM Cuota cu WHERE cu.pagada = true")
+    @Query("SELECT COUNT(cu) FROM Cuota cu WHERE cu.pagada = true AND cu.credito.anulado = false")
     Long contarCuotasPagadas();
 
-    @Query("SELECT COUNT(cu) FROM Cuota cu WHERE cu.pagada = false AND cu.fechaVencimiento >= CURRENT_DATE")
+    @Query("SELECT COUNT(cu) FROM Cuota cu WHERE cu.pagada = false AND cu.fechaVencimiento >= CURRENT_DATE AND cu.credito.anulado = false")
     Long contarCuotasPendientes();
 
 }

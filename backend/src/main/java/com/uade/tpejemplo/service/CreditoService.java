@@ -17,6 +17,8 @@ public interface CreditoService {
 
     List<CreditoResponse> listarPorCliente(String dniCliente);
 
+    CreditoResponse anular(Long id);
+
     List<CreditoDashboardResponse> filtrarParaDashboard(
         String dniCliente,
         String nombreCliente,

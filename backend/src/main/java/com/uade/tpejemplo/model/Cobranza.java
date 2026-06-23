@@ -35,5 +35,8 @@ public class Cobranza {
     @NotNull
     @Column(nullable = false)
     private LocalDate fecha;
-    
+
+    @NotNull
+    @Column(nullable = false)
+    private boolean anulada = false;
 }

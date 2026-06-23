@@ -117,7 +117,7 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     private ClienteDashboardResponse toDashboardResponse(Cliente cliente) {
-        List<Credito> creditos = creditoRepository.findByClienteDni(cliente.getDni());
+        List<Credito> creditos = creditoRepository.findByClienteDniAndAnuladoFalseOrderByIdAsc(cliente.getDni());
 
         BigDecimal deudaTotal = creditos.stream()
             .map(Credito::getDeudaOriginal)
@@ -129,7 +129,7 @@ public class ClienteServiceImpl implements ClienteService {
 
         for (Credito credito : creditos) {
             List<Cuota> cuotas = cuotaRepository.findByIdIdCredito(credito.getId());
-            List<Cobranza> cobranzas = cobranzaRepository.findByCuotaIdIdCredito(credito.getId());
+            List<Cobranza> cobranzas = cobranzaRepository.findByCuotaIdIdCreditoAndAnuladaFalse(credito.getId());
 
             cantidadCuotas += cuotas.size();
             cuotasPagadas += cobranzas.size();
